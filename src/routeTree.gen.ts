@@ -9,38 +9,111 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppWithdrawalRouteImport } from './routes/_app.withdrawal'
+import { Route as AppMutationsRouteImport } from './routes/_app.mutations'
+import { Route as AppInterzoneRouteImport } from './routes/_app.interzone'
+import { Route as AppFixRouteImport } from './routes/_app.fix'
+import { Route as AppFeedRouteImport } from './routes/_app.feed'
 
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppWithdrawalRoute = AppWithdrawalRouteImport.update({
+  id: '/withdrawal',
+  path: '/withdrawal',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMutationsRoute = AppMutationsRouteImport.update({
+  id: '/mutations',
+  path: '/mutations',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInterzoneRoute = AppInterzoneRouteImport.update({
+  id: '/interzone',
+  path: '/interzone',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFixRoute = AppFixRouteImport.update({
+  id: '/fix',
+  path: '/fix',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFeedRoute = AppFeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/feed': typeof AppFeedRoute
+  '/fix': typeof AppFixRoute
+  '/interzone': typeof AppInterzoneRoute
+  '/mutations': typeof AppMutationsRoute
+  '/withdrawal': typeof AppWithdrawalRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/feed': typeof AppFeedRoute
+  '/fix': typeof AppFixRoute
+  '/interzone': typeof AppInterzoneRoute
+  '/mutations': typeof AppMutationsRoute
+  '/withdrawal': typeof AppWithdrawalRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/feed': typeof AppFeedRoute
+  '/_app/fix': typeof AppFixRoute
+  '/_app/interzone': typeof AppInterzoneRoute
+  '/_app/mutations': typeof AppMutationsRoute
+  '/_app/withdrawal': typeof AppWithdrawalRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/feed'
+    | '/fix'
+    | '/interzone'
+    | '/mutations'
+    | '/withdrawal'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/feed' | '/fix' | '/interzone' | '/mutations' | '/withdrawal'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/_app/feed'
+    | '/_app/fix'
+    | '/_app/interzone'
+    | '/_app/mutations'
+    | '/_app/withdrawal'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,12 +121,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/withdrawal': {
+      id: '/_app/withdrawal'
+      path: '/withdrawal'
+      fullPath: '/withdrawal'
+      preLoaderRoute: typeof AppWithdrawalRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/mutations': {
+      id: '/_app/mutations'
+      path: '/mutations'
+      fullPath: '/mutations'
+      preLoaderRoute: typeof AppMutationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/interzone': {
+      id: '/_app/interzone'
+      path: '/interzone'
+      fullPath: '/interzone'
+      preLoaderRoute: typeof AppInterzoneRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/fix': {
+      id: '/_app/fix'
+      path: '/fix'
+      fullPath: '/fix'
+      preLoaderRoute: typeof AppFixRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/feed': {
+      id: '/_app/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof AppFeedRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppFeedRoute: typeof AppFeedRoute
+  AppFixRoute: typeof AppFixRoute
+  AppInterzoneRoute: typeof AppInterzoneRoute
+  AppMutationsRoute: typeof AppMutationsRoute
+  AppWithdrawalRoute: typeof AppWithdrawalRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppFeedRoute: AppFeedRoute,
+  AppFixRoute: AppFixRoute,
+  AppInterzoneRoute: AppInterzoneRoute,
+  AppMutationsRoute: AppMutationsRoute,
+  AppWithdrawalRoute: AppWithdrawalRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
