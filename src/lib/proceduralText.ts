@@ -5,6 +5,8 @@ const NOUNS_BODY = [
   "centipede secretary", "mugwump", "talking asshole", "fleshy keyboard", "typewriter beetle",
   "Dr. Benway", "agent of the Nova Police", "Sender", "Liquefactionist", "Divisionist clone",
   "blue-lipped clerk", "soft machine", "interzone customs officer", "carbonized membrane",
+  "taxidermied switchboard operator", "larval stenographer", "municipal tapeworm",
+  "glass-jawed informant", "intestinal telegraph", "sleepwalking pharmacist", "licensed dream butcher",
 ];
 const VERBS_GROTESQUE = [
   "secretes a greasy translucent fluid",
@@ -17,6 +19,11 @@ const VERBS_GROTESQUE = [
   "weeps a slow amber resin",
   "rearranges its vertebrae into a filing cabinet",
   "broadcasts on the frequency of your fillings",
+  "stamps tomorrow's date onto your soft palate",
+  "dictates an apology through a borrowed larynx",
+  "exchanges your pulse for counterfeit currency",
+  "folds the afternoon into a contaminated envelope",
+  "removes three unauthorized memories with office scissors",
 ];
 const SETTINGS = [
   "the Tangier consulate sub-basement",
@@ -26,6 +33,10 @@ const SETTINGS = [
   "the back office of the Reconditioning Center",
   "an elevator that opens onto your childhood",
   "a market stall selling tongues by the kilo",
+  "the municipal fever archive",
+  "a café where every patron has your handwriting",
+  "the night-shift vivisection tram",
+  "a waiting room beneath the wrong embassy",
 ];
 const ATMOSPHERE = [
   "The radiator hisses a complaint in Mandarin.",
@@ -35,6 +46,10 @@ const ATMOSPHERE = [
   "A wet warmth gathers behind the wallpaper.",
   "Time arrives in unmarked envelopes.",
   "The walls flex once, politely.",
+  "A telephone rings inside the sink.",
+  "The carpet remembers a different pair of feet.",
+  "Every clock coughs at the same second.",
+  "A fly circles the room in perfect square corners.",
 ];
 const PARANOIA = [
   "They have already filed the report.",
@@ -43,6 +58,32 @@ const PARANOIA = [
   "Something is reading you in return.",
   "Your name appears on a list you have not seen.",
   "The transcript will reach you before the conversation ends.",
+  "Your alibi has begun answering questions without you.",
+  "A clerk is practicing your signature in the next room.",
+  "They left the microphone visible because concealment is no longer necessary.",
+];
+
+const OPENINGS = [
+  "The transmission begins halfway through a sentence.",
+  "A procedural error opens briefly behind your left eye.",
+  "Your file clears its throat.",
+  "At an hour not printed on any clock, the channel opens.",
+  "The screen develops a pulse and issues the following correction.",
+];
+
+const DIRECTIVES = [
+  "Do not sign anything that recognizes you.",
+  "Keep the receipt under your tongue until questioned.",
+  "If the elevator asks your destination, lie.",
+  "Count the exits again; one of them has learned to move.",
+  "Destroy this instruction after remembering it incorrectly.",
+];
+
+const DEEP_DESCENT = [
+  "For nine wet seconds, every object in the room shares one nervous system.",
+  "Your browser history appears as bruises along the clerk's neck.",
+  "The sentence turns around and watches you finish reading it.",
+  "A second version of you signs the discharge papers from inside the wall.",
 ];
 
 export interface HallucinationSeed {
@@ -85,14 +126,21 @@ export function generateHallucination(seed: HallucinationSeed): string {
   const atmo = pick(ATMOSPHERE);
 
   const lines: string[] = [];
+  if (Math.random() > 0.62) lines.push(pick(OPENINGS));
   if (seed.substance && SUBSTANCE_FLAVOR[seed.substance]) {
     lines.push(pick(SUBSTANCE_FLAVOR[seed.substance]));
   }
-  lines.push(`In ${setting}, a ${noun} ${verb}.`);
+  const scene = Math.random();
+  if (scene < 0.34) lines.push(`In ${setting}, a ${noun} ${verb}.`);
+  else if (scene < 0.67) lines.push(`A ${noun} follows you through ${setting} and ${verb}.`);
+  else lines.push(`Official correction: the ${noun} in ${setting} did not ${verb}. You did.`);
   lines.push(atmo);
-  if (seed.descent >= 4) lines.push(pick(PARANOIA));
+  if (seed.paranoia >= 35 || seed.descent >= 4) lines.push(pick(PARANOIA));
+  if (seed.descent >= 5 && Math.random() > 0.45) lines.push(pick(DIRECTIVES));
   if (seed.descent >= 7) {
-    lines.push(`${pick(PRONOUNS_2P).replace(/^./, c => c.toUpperCase())} has been replaced with a clerical instrument and no one has noticed.`);
+    lines.push(Math.random() > 0.5
+      ? `${pick(PRONOUNS_2P).replace(/^./, c => c.toUpperCase())} has been replaced with a clerical instrument and no one has noticed.`
+      : pick(DEEP_DESCENT));
   }
   return lines.join(" ");
 }
@@ -107,6 +155,11 @@ export function generateSurveillanceLine(ctx: { idleMs?: number; descent: number
     "Operator note: target appears to be reading the surveillance log.",
     "The centipede secretaries are transcribing your micro-expressions.",
     "Interzone Bureau acknowledges receipt of your involuntary tremor.",
+    "Predictive model confirms subject will reread this line.",
+    "A second cursor has been detected beneath the visible cursor.",
+    "Dental microphone reports low-confidence whispering.",
+    "Subject's shadow arrived 0.8 seconds before subject.",
+    "Routine deviation categorized as decorative resistance.",
   ];
   if (ctx.idleMs && ctx.idleMs > 8000) {
     return `Target has been motionless for ${Math.round(ctx.idleMs / 1000)} seconds. Awaiting instruction.`;
@@ -115,6 +168,24 @@ export function generateSurveillanceLine(ctx: { idleMs?: number; descent: number
     return `Cross-reference confirms: the reader and the read are no longer separable.`;
   }
   return pick(base);
+}
+
+const PROBE_ACTIONS = [
+  "touches the nearest wall", "asks who owns the room", "checks beneath the furniture",
+  "holds their breath", "reads the smallest available print", "knocks three times on the floor",
+  "attempts to remember arriving", "looks directly at the surveillance lens",
+];
+
+export function generateInteractionResponse(roomTitle: string, descent: number, paranoia: number): string {
+  const action = pick(PROBE_ACTIONS);
+  const noun = pick(NOUNS_BODY);
+  const reaction = pick(VERBS_GROTESQUE);
+  const lines = [`You ${action}. The room labeled “${roomTitle}” answers first.`];
+  if (Math.random() > 0.5) lines.push(`A ${noun} ${reaction}.`);
+  else lines.push(pick(ATMOSPHERE));
+  if (paranoia >= 45) lines.push(pick(PARANOIA));
+  if (descent >= 7) lines.push(pick(DEEP_DESCENT));
+  return lines.join(" ");
 }
 
 export function generateRoomVignette(slug: string, descent: number): string {
