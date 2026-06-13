@@ -51,7 +51,7 @@ export function InterzoneLayout() {
   ];
 
   return (
-    <div className="iz-scanlines iz-noise min-h-screen">
+    <div className="iz-scanlines iz-noise min-h-screen flex flex-col">
       <header className="sticky top-0 z-50 backdrop-blur-sm bg-iz-ink/85 border-b border-iz-vein">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <Link to="/feed" className="flex items-center gap-2 group">
@@ -103,9 +103,25 @@ export function InterzoneLayout() {
         </nav>
       </header>
 
-      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-6">
+      <main className="flex-1 max-w-7xl mx-auto px-3 sm:px-4 py-6 w-full">
         <Outlet />
       </main>
+
+      <footer className="border-t border-iz-vein bg-iz-ink/60">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+            <span className="text-iz-vein">Interzone Bureau </span>— No records without consent
+          </p>
+          <a
+            href="https://www.themeansofproduction.press"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] font-mono text-iz-pus hover:text-iz-bone transition-colors uppercase tracking-widest"
+          >
+            The Means of Production
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }
