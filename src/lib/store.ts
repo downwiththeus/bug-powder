@@ -65,7 +65,7 @@ export const useInterzone = create<InterzoneState>()(
       mutations: [],
       ending: null,
       surveillanceLogs: [
-        { id: crypto.randomUUID(), severity: "LOW", message: "SYS_INIT: Interzone typewriter link established.", at: Date.now() },
+        { id: "sys-init", severity: "LOW", message: "SYS_INIT: Interzone typewriter link established.", at: 0 },
       ],
       hallucinations: [],
 
